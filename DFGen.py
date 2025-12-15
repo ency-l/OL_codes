@@ -22,6 +22,7 @@ outDF=pd.DataFrame()                            #initialize output datafile as a
 colNamesList=(                                  # Columns from the input file that will be included in the output file
     'Image',                                    # the list is a tuple
     'Parent',
+    'Object ID',
     'Centroid X µm',
     'Centroid Y µm',
     "Nucleus: Area",
@@ -38,6 +39,7 @@ outDF.rename(columns={
     "Centroid X µm":"CentX_um",                 # renames some of these cols to remove special characters
     "Centroid Y µm":"CentY_um",
     "Nucleus: Area": "nucArea",
+    "Object ID": "ObjID",
     "Nucleus: Cy5 mean":"nucOligMean",
     "Cell: FITC mean":"cellPTDPMean"},inplace=True)
 
