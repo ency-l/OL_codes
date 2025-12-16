@@ -39,12 +39,12 @@ theme = (
     )
 
 
-def violin(x,title="",xlabel=None,ylabel=None):
+def violin(x,axe,title="",xlabel="",ylabel=""):
+    ax=axe
     subsample = [xSampler(x[i], 500) for i in range(0, 2)]
     varName=x[0].name
     
 #### Main plot layout ####
-    fig,ax=plt.subplots(figsize=(3,4))   
     ax.set_title(title)
     ax.set_xticks([0,1],["Rep1","Rep2"])
     ax.set_xlim(-0.5,2.5)
@@ -58,7 +58,7 @@ def violin(x,title="",xlabel=None,ylabel=None):
                     alpha=0.8,
                     dodge=False,
                     ax=ax,
-                    # color="seagreen",
+                    color="palegreen",
                 #   edgecolor='green',
                 #   linewidth=0.2
                     )
@@ -75,8 +75,8 @@ def violin(x,title="",xlabel=None,ylabel=None):
                 ##### styling #####
     for body in vln['bodies']:
         body.set_alpha(0.5)
-        # body.set_facecolor('lightgreen')
-        # body.set_edgecolor('limegreen')
+        body.set_facecolor('limegreen')
+        body.set_edgecolor('limegreen')
     # for part in ('cquantiles','cmins','cmaxes','cbars'):
         # vln[part].set_edgecolor('orangered')
         # vln[part].set_linewidth(0.5)
@@ -87,9 +87,16 @@ def violin(x,title="",xlabel=None,ylabel=None):
 # Plotting---------------------------------
 
 var='Z_L2cellPTDPMean'
-plotname="ptdp_rt_distr"
+plotname="TDP_distr_1"
 theme.apply()
-violin(varSelect(var),ylabel="pTDP-43 (Z)")
+
+
+
+fig=plt.figure(figsize=(3,4))
+fig.suptitle("pTDP")
+ax=fig.subplots()
+
+violin(varSelect(var),axe=ax,ylabel="pTDP (Z)")
 plt.savefig(f"{path}/{plotname}.png",
                 transparent=True,
                 dpi=300,
