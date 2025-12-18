@@ -54,59 +54,6 @@ theme = (
     .set_ticks(direction='in',size_major=3,draw_minor=False)
     )
 theme.apply()
-
-def violin(data,x,axe,title="",xlabel="",ylabel=""):
-    ax=axe
-    x=data[x]
-    # print(list(x))
-    subsample = pd.DataFrame(xSampler(x, 1000)) #plotting a subsample for visibilty/resource usage.
-
-    subsample["class"] = "pos"   # re-creating the classes col in the new subsample df. This is for color mapping later.
-    subsample.loc[subsample[0] < z, "class"] = "neg"    #assign everything the positive class by default, then change the ones below threshold to negative.
-
-#### Main plot layout ####
-    ax.set_title(title)
-    ax.set_xticks([0],[xlabel])
-    ax.set_xlim(-0.5,2.5)
-    # ax.set_ylim(-2,5.5)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-
-##### swarm #####
-    seaborn.swarmplot(data=subsample,
-                    y=0,            
-                    size=1,
-                    alpha=0.8,
-                    dodge=False,
-                    ax=ax,
-                    hue='class',    #value from 'class' will be used to map colors.
-                    legend=False,
-                    palette={"pos":posColor, "neg":"grey"}  # map class value to color arg
-                    )
-
-##### violin #####      #somehow this isn't working. but we also don't need it in this graph so removing it for now.
-    # vln=ax.violinplot(x,
-    #                 showmeans=True,
-    #                 showextrema=True,
-    #                 widths=0.8,
-    #                 quantiles=([0.25,0.75])
-    #                 )
-                        
-    #             ##### styling #####
-    # for body in vln['bodies']:
-    #     body.set_alpha(0.5)
-    #     # body.set_facecolor('lightgreen')
-    #     # body.set_edgecolor('limegreen')
-    # # for part in ('cquantiles','cmins','cmaxes','cbars'):
-    #     # vln[part].set_edgecolor('orangered')
-    #     # vln[part].set_linewidth(0.5)
-    #     # vln[part].set_linestyle('--')
-    # vln['cmeans'].set_linewidth(1)
-    # vln['cmeans'].set_edgecolor('magenta')
-    # ax.axhline(z,linestyle="--",
-    #            color='red',
-    #            linewidth=2)
-
     
 def scatter(data,x,y,axe,xlabel,ylabel,title=""):  #passing x and y as specifications in the same dataset so that color is preserved
     x=data[x]
@@ -115,7 +62,7 @@ def scatter(data,x,y,axe,xlabel,ylabel,title=""):  #passing x and y as specifica
     axe.set_title(f"{title}")
     axe.set_xlabel(xlabel)
     axe.set_ylabel(ylabel)
-
+    
 ################### Change these ####################    
 x_coord='CentX_um'
 y_coord='CentY_um'
@@ -125,24 +72,28 @@ var='Z_L2cellPTDPMean'
 posColor="lime"
 section=dataFilter(1)
 z=float(6.5)
-plotname=f"pTDP-43_z{z}"
+plotname=f"pTDP-43_z{z}_spatial"
+spaceFunc=section[y_coord]>0.201*section[x_coord]+1895
 #######################################################
 
 
-section["color"] = posColor  #directly encoding color args in the new color class, only works for mpl, not seaborn (see violin())
-section.loc[section[var] < z, "color"] ="dimgray"  #setting everything as the positive color first, then change everything below-threshold to negative color.
-# print(section['color'])
+section["color"] = "dimgray"  #set all dots to base color
+section.loc[spaceFunc,'color']='#444'   # use colorfunc to set dots from a given spatial context to another color
+section.loc[section[var] > z, "color"] = posColor  # add on positive color
+
 # initialize figure
 fig=plt.figure(figsize=(6,4))
 # axs=fig.subplots(1,2,width_ratios=(1,4))
 axs=fig.subplots()
 #in title, show current z score, number and % of cells above threshold. 
-fig.suptitle(f"pTDP-43, Z≥{z}, {len(section[section["color"]==posColor])}/{len(section)} ({round(100*(len(section[section["color"]==posColor])/len(section)),2)}%)")
+fig.suptitle(f"pTDP-43, \nZ≥{z}, line at y=0.2x+1895")  #title is hard-coded for now
 
 # plot figures
-# violin(data=section,x=var,axe=axs[0],ylabel="Olig (Z)")
 
-scatter(section,x_coord,y_coord,axs,xlabel=xlabel,ylabel=ylabel)
+scatter(section[section["Parent"]=="GM"],x_coord,y_coord,axs,xlabel=xlabel,ylabel=ylabel)
+
+# line for outlining the spatial boundary
+plt.axline((0,1895),slope=0.201,color='red')
 
 
 # save figures
