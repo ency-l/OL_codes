@@ -22,14 +22,21 @@ def dataFilter(num,var):     #if given one single number for num, get all rows f
     if type(num)==int:
         df=dataDF[dataDF['Image']==num][var]  
     elif type(num)==tuple:  #if give a tuple "()", check if the max number in the tuple exists in the Image column and then get all rows whose Image value is in the tuple and the col with variable name.
-        df=()
+        df=list()
+        mx=max(num)
         try:
-            if len(dataDF[dataDF['Image']==max(num)])!=0:
-                for i in range (1,max(num)+1):
-                    df[i-1]=dataDF[dataDF['Image']==num[i]][var]
+            if len(dataDF[dataDF['Image']==mx])!=0: #has at least one entry from the given max image number
+                filteredDf=pd.DataFrame(dataDF[dataDF['Image'].isin(num)])
+                # print(filteredDf)
+                for i in range (0,len(num)):
+                    imgID=num[i]
+                    subDf=filteredDf[filteredDf['Image']==imgID]
+                    subDf=subDf[var]
+                    df.append(subDf)
         except:
             print("Invalid input. Check number of replicates in the active dataset and variable name.")
     return df   # is a single df or a list of dfs
+
 
 def xSampler(input,n):            #for an input tuple x,randomly sample n entries from the input and output this sampled list.
     input_new=[x for x in input]
@@ -49,7 +56,6 @@ theme = (
 def violin(x,axe,title="",xlabel="",ylabel=""):
     ax=axe
     subsample = [xSampler(x[i], 500) for i in range(0, 2)]
-    varName=x[0].name
     
 #### Main plot layout ####
     ax.set_title(title)
